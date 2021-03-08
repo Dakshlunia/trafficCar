@@ -3,6 +3,7 @@ var player, playerImg;
 var backgroundImg;
 var obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obstacle6, obstacle7, obstacle8, obstacle9, obstacle10;
 var obstaclesGroup;
+var petrol=300,petrolPump,petrolGroup;
 var score=0;
 var PLAY=1,END=0;
 var gameState=PLAY;
@@ -21,6 +22,7 @@ function preload() {
     obstacle8 = loadImage("images/redcar2.png");
     obstacle9 = loadImage("images/redTruck.png");
     obstacle10 = loadImage("images/BigTruck.png");
+    petrolPump= loadImage("images/petrolPump.png");
 }
 
 function setup() {
@@ -33,13 +35,15 @@ function setup() {
     player.rotation=90;
     console.log(player);
     obstaclesGroup= new Group();
-    player.debug=true;
+    petrolGroup= new Group();
+    
 }
 
 function draw() {
     background(0);
     if(gameState===PLAY){
         score=score+1;
+        petrol-- 
     if (keyDown(RIGHT_ARROW)) {
         ground.x = ground.x - 15
 
@@ -55,13 +59,18 @@ function draw() {
     if(ground.x<0){
         ground.x=width/2;
     }
-    if(player.isTouching(obstaclesGroup)){
+    if(player.isTouching(petrolGroup)){
+        petrol=petrol+200;
+        petrolGroup.destroyEach();
+    }
+    if(player.isTouching(obstaclesGroup)|| petrol <= 0){
         gameState=END;
         obstaclesGroup.setVelocityXEach(0);
         obstaclesGroup.setLifetimeEach(-1);
     }
     spawnObstacles();
     spawnPolice();
+    spawnPetrol();
 }
 drawSprites();
 textSize(30);
@@ -70,6 +79,7 @@ strokeWeight(3);
  stroke(0);
 textAlign(CENTER);
 text('score: '+score,width-100,100)
+text('Petrol Left: '+petrol,width-100,150)
     //camera.position.x=player.x;
     //camera.position.y=400;
     if(gameState===END){
@@ -86,7 +96,7 @@ text('score: '+score,width-100,100)
 
 function spawnObstacles() {
     if (frameCount % 60 === 0) {
-        var obstacle = createSprite(width, 400, 10, 40);
+        var obstacle = createSprite(width, 400, 10, 30);
         //obstacle.debug = true;
         
         obstacle.velocityX = -(6 + 3 * score / 100);
@@ -115,8 +125,7 @@ function spawnObstacles() {
         }
        // obstacle.scale=2.5;
         //assign scale and lifetime to the obstacle           
-        obstacle.debug=true;
-        obstacle.setCollider('rectangle',0,20,50,120);
+        obstacle.setCollider('rectangle',0,0,50,120);
         obstacle.lifetime = 300;
         
         //add each obstacle to the group
@@ -144,7 +153,27 @@ function spawnPolice() {
        // obstacle.scale=2.5;
         //assign scale and lifetime to the obstacle           
         police.lifetime = 300;
+        
         //add each obstacle to the group
         obstaclesGroup.add(police);
     }
+}
+    function spawnPetrol() {
+        if (frameCount % 120 === 0) {
+            var petrolP = createSprite(width, 400, 10, 40);
+            //obstacle.debug = true;
+            
+            petrolP.velocityX = -(8 + 3 * score / 100);
+           petrolP.y=Math.round(random(200,600));
+           petrolP.rotation = -90;
+           petrolP.addImage(petrolPump);
+            //generate random obstacles
+          
+           // obstacle.scale=2.5;
+            //assign scale and lifetime to the obstacle           
+            petrolP.lifetime = 300;
+           
+            //add each obstacle to the group
+            petrolGroup.add(petrolP);
+        }
 }
